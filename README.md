@@ -62,7 +62,7 @@ The encoding has a fixed length header composed by 65 bit. The partition of thes
 - [33,48]: Tells the program what is the maximum number of bits necessary to describe the nodes
 - [49,64]: Tells the program what is the maximum number of bits necessary to describe the weights (if 0, no bits will be used during the encoding for the purpose of weights)
 
-Every other line is dinamically composed of $2* NodeBits + NodeWeight$ in order to describe each edge. In the end the dimension of the encoding should be of $ 65 + nEdges * (2* NodeBits + NodeWeight)$ although due to the implementation via the BitSet API of java, the actual space occupied is equal to the next power of two that could fit the formula above.
+Every other line is dinamically composed of $2* NodeBits + NodeWeight$ in order to describe each edge. In the end the dimension of the encoding should be of $65 + nEdges * (2* NodeBits + NodeWeight)$ although due to the implementation via the BitSet API of java, the actual space occupied is equal to the next power of two that could fit the formula above.
 This limit only apply to the space occupied, in fact knowing the number of edges from the header it's possible to avoid reading all the BitSet.
 
 ### Decoding
