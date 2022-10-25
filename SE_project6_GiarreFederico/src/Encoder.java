@@ -42,16 +42,7 @@ public class Encoder implements Runnable {
         BitSet syncdir = new BitSet();
 
 
-        /*syncinsert(g.getEdges().size(),syncedges,32);
-        syncinsert(bitline,synclines,16);
-        syncinsert(bitnodes,syncnodes,16);
-        syncinsert(bitweights,syncweight,16);
-        syncinsert(g.isDirected(),syncdir,1);
-        concatenateBitSet(syncnodes,syncweight,16);
-        concatenateBitSet(synclines,syncnodes,16);
-        concatenateBitSet(syncedges,synclines,32);
-        concatenateBitSet(syncdir,syncedges,1);
-        concatenateBitSet(bs,syncdir,0);*/
+
 
         syncinsert(g.getEdges().size(),syncedges,32);
         syncinsert(bitnodes,syncnodes,16);
@@ -62,7 +53,7 @@ public class Encoder implements Runnable {
         concatenateBitSet(syncdir,syncedges,1);
         concatenateBitSet(bs,syncdir,0);
 
-        System.out.println("edges:"+g.getEdges().size()+" line:"+bitline+" bitnode:"+bitnodes+" bitweight:"+bitweights);
+        //System.out.println("edges:"+g.getEdges().size()+" line:"+bitline+" bitnode:"+bitnodes+" bitweight:"+bitweights);
         for(int i = 0; i<nthread;i++){
 
             Thread t = new Thread (this, ""+i);

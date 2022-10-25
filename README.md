@@ -21,6 +21,7 @@ y is how much the graph is connected. The values y can have are:
 
 w (if present) indicates that the graph is weighted
 
+
 #### graph_generator.py
 
 Is a script to generate graphs given a name for the output file, number of nodes, number of edges and a flag to make the graph weighted. Please refer to the help prompt of the script (python3 graph_generator.py -h) for usage
@@ -40,6 +41,8 @@ Choosing the latter, the user has 3 choices:
 - **Verbose:** Original, encoded and decoded graph are printed, so that it's possible to verify each step of the process
 - **Performance:** Data regarding time used to encode/decode the graph and information about the space used is shown to the user
 - **Infinite loop:** The program is executed over and over, this was used to debug cases of race condition
+
+P.S. Due to the nature of Verbose mode, executing big graphs could lead to freezes of the stoud buffer. Other modes work as expected
 
 ### Graph Class
 

@@ -10,7 +10,7 @@ public class Main {
     public static void main(String[] args) throws InterruptedException {
         Graph g = new Graph(true);
         Scanner sc= new Scanner(System.in);
-        System.out.print("Enter the name of the file .txt to load situated in the Examples folder:");
+        System.out.print("Enter the name of the file to load situated in the Examples folder:");
         examplename= sc.nextLine();
         System.out.print("Enter the number of threads you whish to use to run the encoding/decoding:");
         nthread= sc.nextInt();
@@ -19,7 +19,7 @@ public class Main {
         System.out.flush();
 
         try {
-            File myObj = new File("Examples/"+examplename+".txt");
+            File myObj = new File("Examples/"+examplename);
             Scanner myReader = new Scanner(myObj);
             while (myReader.hasNextLine()) {
                 String data = myReader.nextLine();
