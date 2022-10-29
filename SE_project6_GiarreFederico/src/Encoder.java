@@ -24,7 +24,8 @@ public class Encoder implements Runnable {
     public Encoder(Graph g, int nthread) throws InterruptedException {
         this.g = g;
         bitedges = roundup(g.getEdges().size());
-        bitnodes = roundup(g.getNodes().size());
+        //bitnodes = roundup(g.getNodes().size());
+        bitnodes = g.getMaxnodelenght();
         bitweights = roundup(g.getMaxweight())+1;
         if(bitweights == 1){
             bitweights--;

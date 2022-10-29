@@ -2,11 +2,11 @@ import java.util.ArrayList;
 import java.util.BitSet;
 
 public class Decoder implements Runnable {
-    private BitSet bs;
-    private int nedges;
-    private int line;
-    private int bitnode;
-    private int bitweight;
+    private BitSet bs; //store the BitSet
+    private int nedges; //store the number of Edges
+    private int line; //store the length (in bit) of every line (header excluded)
+    private int bitnode; //store the length (in bit) of the representation of a node
+    private int bitweight; //store the length (in bit) if the representation of a weight (can be 0)
     private Thread t;
     private int nthread;
     private ArrayList<Thread> threads;
@@ -31,7 +31,7 @@ public class Decoder implements Runnable {
         g = new Graph(isDirected);
         for(int i = 0; i<nthread;i++){
 
-            Thread t = new Thread (this, ""+i);
+            t = new Thread (this, ""+i);
             t.start();
             threads.add(t);
         }
@@ -77,11 +77,7 @@ public class Decoder implements Runnable {
             }
         }
 
-
-        Edge tmp = new Edge(node1,node2,weight);
-        //System.out.println(tmp);
-
-        g.addEdge(tmp);
+        g.addEdge(new Edge(node1,node2,weight));
     }
     public  int convert(BitSet bits,int pad) {
         int intValue = 0;
