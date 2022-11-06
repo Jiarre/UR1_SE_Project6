@@ -104,27 +104,39 @@ public class Main {
         }
     }
     public static void start_performance_test(Graph g) throws InterruptedException {
-        BitSet bs;
-        long startencoding = System.nanoTime();
-        Encoder e = new Encoder(g,nthread_encoding);
-        long stopencoding = System.nanoTime();
+        float sume=0;
+        float sumd=0;
+        float avg_encoding=0;
+        float avg_decoding=0;
+        Graph result = null;
+        Encoder e = null;
+        for(int i = 1; i<100; i++) {
+            BitSet bs;
+            long startencoding = System.nanoTime();
+            e = new Encoder(g, nthread_encoding);
+            long stopencoding = System.nanoTime();
 
-        bs = e.getBs();
-        long startdecoding = System.nanoTime();
-        Decoder d = new Decoder(bs,nthread_decoding);
-        long stopdecoding = System.nanoTime();
-        Graph result = d.getGraph();
-
+            bs = e.getBs();
+            long startdecoding = System.nanoTime();
+            Decoder d = new Decoder(bs, nthread_decoding);
+            long stopdecoding = System.nanoTime();
+            result = d.getGraph();
+            sume += ((float)(stopencoding-startencoding)/1000000);
+            sumd += ((float)(stopdecoding-startdecoding)/1000000);
+        }
+        avg_encoding = sume/100;
+        avg_decoding = sumd/100;
         if(result.equals(g)){
             System.out.println("\n\nOriginal and Encoded/Decoded Graph are the same :D");
             System.out.println("Performances to encode/decode a Graph with "+g.getEdges().size() +" edges using "+nthread_encoding+" threads to encode and "+nthread_decoding+" threads to decode:");
-            System.out.println("Time to encode the graph:" + ((float)(stopencoding-startencoding)/1000000) + "ms");
-            System.out.println("Time to decode the graph:" + ((float)(stopdecoding-startdecoding)/1000000) + "ms");
-            System.out.println("Original Graph successfully encoded in " + (1+32+32+32+32+(g.getEdges().size()*(2*e.getBitnodes()+e.getBitweights()))) + " bits");
+            System.out.println("Time to encode the graph:" + (avg_encoding) + "ms");
+            System.out.println("Time to decode the graph:" + (avg_decoding) + "ms");
+            System.out.println("Original Graph successfully encoded in " + (1+32+16+16+(g.getEdges().size()*(2*e.getBitnodes()+e.getBitweights()))) + " bits");
         }else{
             System.out.println("\nOriginal and Encoded/Decoded Graph are not the same :c");
 
         }
+
     }
 
 }

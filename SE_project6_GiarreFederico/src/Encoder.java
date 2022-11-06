@@ -26,7 +26,7 @@ public class Encoder implements Runnable {
         bitedges = roundup(g.getEdges().size());
         //bitnodes = roundup(g.getNodes().size());
         bitnodes = g.getMaxnodelenght();
-        bitweights = roundup(g.getMaxweight())+1;
+        bitweights = g.getMaxweight()+1;
         if(bitweights == 1){
             bitweights--;
         }
