@@ -1,5 +1,6 @@
 import java.util.ArrayList;
 import java.util.BitSet;
+import java.util.Vector;
 
 public class Decoder implements Runnable {
     private BitSet bs; //store the BitSet
@@ -10,6 +11,8 @@ public class Decoder implements Runnable {
     private Thread t;
     private int nthread;
     private ArrayList<Thread> threads;
+
+    private ArrayList<Edge> results;
 
     private boolean isDirected;
 
@@ -29,6 +32,7 @@ public class Decoder implements Runnable {
         line = 2*bitnode + bitweight;
         //System.out.println("edges:"+nedges+" line:"+line+" bitnode:"+bitnode+" bitweight:"+bitweight);
         g = new Graph(isDirected);
+        results = new ArrayList<Edge>();
         for(int i = 0; i<nthread;i++){
 
             t = new Thread (this, ""+i);
@@ -38,6 +42,9 @@ public class Decoder implements Runnable {
 
         for(Thread t : threads){
             t.join();
+        }
+        for(Edge e : results){
+            g.addEdge(e);
         }
 
     }
@@ -49,21 +56,22 @@ public class Decoder implements Runnable {
     public void decodeBitSet() throws InterruptedException {
         int tn = Integer.parseInt(Thread.currentThread().getName());
         int d = (int) Math.floor(nedges/nthread);
-
+        ArrayList<Edge> partial_result = new ArrayList<>();
         if(tn != nthread-1){
             //System.out.println("THread "+ tn + "if normale");
             for(int i = tn*d; i<(tn+1)*d; i++){
-                decodeEdge(bs.get(65+(i*line),65+((i+1)*line)));
+                partial_result.add(decodeEdge(bs.get(65+(i*line),65+((i+1)*line))));
             }
         }else{
             //System.out.println("THread "+ tn + "if speciale");
             for(int i = tn*d; i<nedges; i++){
-                decodeEdge(bs.get(65+(i*line),65+((i+1)*line)));
+                partial_result.add(decodeEdge(bs.get(65+(i*line),65+((i+1)*line))));
             }
         }
+        results.addAll(partial_result);
 
     }
-    public void decodeEdge(BitSet edge){
+    public Edge decodeEdge(BitSet edge){
         int node1 = convert(edge.get(0,bitnode),bitnode);
         int node2 = convert(edge.get(bitnode,2*bitnode),bitnode);
         int weight = 0;
@@ -77,7 +85,7 @@ public class Decoder implements Runnable {
             }
         }
 
-        g.addEdge(new Edge(node1,node2,weight));
+        return new Edge(node1,node2,weight);
     }
     public  int convert(BitSet bits,int pad) {
         int intValue = 0;
