@@ -1,9 +1,10 @@
+import java.lang.reflect.Array;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class Graph {
 
-    private Vector<Edge> edges;
+    private ArrayList<Edge> edges;
     //private HashSet nodes;
     private int maxweight;
 
@@ -16,7 +17,7 @@ public class Graph {
 
     private boolean isDirected;
     public Graph(boolean isDirected){
-        this.edges = new Vector<>();
+        this.edges = new ArrayList<>();
         //this.nodes = new HashSet();
         this.maxweight = 0;
         this.isDirected = isDirected;
@@ -27,7 +28,7 @@ public class Graph {
 
     }
     public Graph(boolean isDirected,int nedges){
-        this.edges = new Vector<>(nedges);
+        this.edges = new ArrayList<>(nedges);
         for (int i = 0; i < nedges; i++) {
             edges.add(null);
         }
@@ -81,11 +82,11 @@ public class Graph {
         System.out.println(edges);
     }
 
-    public Vector<Edge> getEdges() {
+    public ArrayList<Edge> getEdges() {
         return edges;
     }
 
-    public void setEdges(Vector<Edge> edges) {
+    public void setEdges(ArrayList<Edge> edges) {
         this.edges = edges;
     }
 

@@ -12,7 +12,7 @@ public class Decoder implements Runnable {
     private int nthread;
     private ArrayList<Thread> threads;
 
-    private Vector<Edge> results;
+    private ArrayList<Edge> results;
 
     private boolean isDirected;
 
@@ -35,8 +35,10 @@ public class Decoder implements Runnable {
             g = new Graph(isDirected,bitnode,bitweight);
         else
             g = new Graph(isDirected,bitnode,bitweight-1);
-        results = new Vector<>();
-
+        results = new ArrayList<>(nedges);
+        for(int i=0; i<nedges;i++){
+            results.add(null);
+        }
         for(int i = 0; i<nthread;i++){
 
             t = new Thread (this, ""+i);
@@ -63,17 +65,17 @@ public class Decoder implements Runnable {
         if(tn != nthread-1){
             //System.out.println("THread "+ tn + "if normale");
             for(int i = tn*d; i<(tn+1)*d; i++){
-                decodeEdge(bs.get(65+(i*line),65+((i+1)*line)));
+                decodeEdge(bs.get(65+(i*line),65+((i+1)*line)),i);
             }
         }else{
             //System.out.println("THread "+ tn + "if speciale");
             for(int i = tn*d; i<nedges; i++){
-                decodeEdge(bs.get(65+(i*line),65+((i+1)*line)));
+                decodeEdge(bs.get(65+(i*line),65+((i+1)*line)),i);
             }
         }
 
     }
-    public void decodeEdge(BitSet edge){
+    public void decodeEdge(BitSet edge,int position){
         int node1 = convert(edge.get(0,bitnode),bitnode);
         int node2 = convert(edge.get(bitnode,2*bitnode),bitnode);
         int weight = 0;
@@ -87,7 +89,7 @@ public class Decoder implements Runnable {
             }
         }
 
-        results.add(new Edge(node1,node2,weight));
+        results.set(position,new Edge(node1,node2,weight));
     }
     public  int convert(BitSet bits,int pad) {
         int intValue = 0;
