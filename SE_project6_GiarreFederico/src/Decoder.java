@@ -31,7 +31,7 @@ public class Decoder implements Runnable {
         bitweight = convert(bs.get(49,65),16);
         line = 2*bitnode + bitweight;
         //System.out.println("edges:"+nedges+" line:"+line+" bitnode:"+bitnode+" bitweight:"+bitweight);
-        g = new Graph(isDirected);
+        g = new Graph(isDirected,nedges);
         results = new ArrayList<Edge>();
         for(int i = 0; i<nthread;i++){
 
@@ -43,9 +43,7 @@ public class Decoder implements Runnable {
         for(Thread t : threads){
             t.join();
         }
-        for(Edge e : results){
-            g.addEdge(e);
-        }
+
 
     }
 
@@ -56,22 +54,20 @@ public class Decoder implements Runnable {
     public void decodeBitSet() throws InterruptedException {
         int tn = Integer.parseInt(Thread.currentThread().getName());
         int d = (int) Math.floor(nedges/nthread);
-        ArrayList<Edge> partial_result = new ArrayList<>();
         if(tn != nthread-1){
             //System.out.println("THread "+ tn + "if normale");
             for(int i = tn*d; i<(tn+1)*d; i++){
-                partial_result.add(decodeEdge(bs.get(65+(i*line),65+((i+1)*line))));
+                decodeEdge(bs.get(65+(i*line),65+((i+1)*line)),i);
             }
         }else{
             //System.out.println("THread "+ tn + "if speciale");
             for(int i = tn*d; i<nedges; i++){
-                partial_result.add(decodeEdge(bs.get(65+(i*line),65+((i+1)*line))));
+                decodeEdge(bs.get(65+(i*line),65+((i+1)*line)),i);
             }
         }
-        results.addAll(partial_result);
 
     }
-    public Edge decodeEdge(BitSet edge){
+    public void decodeEdge(BitSet edge,int position){
         int node1 = convert(edge.get(0,bitnode),bitnode);
         int node2 = convert(edge.get(bitnode,2*bitnode),bitnode);
         int weight = 0;
@@ -85,7 +81,7 @@ public class Decoder implements Runnable {
             }
         }
 
-        return new Edge(node1,node2,weight);
+        g.addEdgePostion(new Edge(node1,node2,weight),position);
     }
     public  int convert(BitSet bits,int pad) {
         int intValue = 0;

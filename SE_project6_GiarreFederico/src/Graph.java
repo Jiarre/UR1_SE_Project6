@@ -3,7 +3,7 @@ import java.util.concurrent.ConcurrentHashMap;
 
 public class Graph {
 
-    private Vector<Edge> edges;
+    private ArrayList<Edge> edges;
     //private HashSet nodes;
     private int maxweight;
 
@@ -16,7 +16,22 @@ public class Graph {
 
     private boolean isDirected;
     public Graph(boolean isDirected){
-        this.edges = new Vector<>();
+        this.edges = new ArrayList<>();
+        //this.nodes = new HashSet();
+        this.maxweight = 0;
+        this.isDirected = isDirected;
+        //this.nodesMap = new ConcurrentHashMap<>();
+        //this.nodesSet = nodesMap.keySet("SET-ENTRY");
+        this.maxnodelenght = 0;
+
+
+    }
+    public Graph(boolean isDirected,int nedges){
+        this.edges = new ArrayList<>(nedges);
+        for (int i = 0; i < nedges; i++) {
+            edges.add(null);
+        }
+
         //this.nodes = new HashSet();
         this.maxweight = 0;
         this.isDirected = isDirected;
@@ -41,6 +56,22 @@ public class Graph {
         }
 
     }
+    public void addEdgePostion(Edge e,int position){
+        this.edges.set(position,e);
+
+        synchronized (this){
+            if(roundup(e.getN1())>this.maxnodelenght){
+                this.maxnodelenght = roundup(e.getN1());
+            }
+            if(roundup(e.getN2())>this.maxnodelenght){
+                this.maxnodelenght = roundup(e.getN2());
+            }
+            if(e.getWeight()>this.maxweight){
+                this.maxweight = e.getWeight();
+            }
+        }
+
+    }
     public int roundup(int k){
         int power = 1;
         int count = 0;
@@ -54,11 +85,11 @@ public class Graph {
         System.out.println(edges);
     }
 
-    public Vector<Edge> getEdges() {
+    public ArrayList<Edge> getEdges() {
         return edges;
     }
 
-    public void setEdges(Vector<Edge> edges) {
+    public void setEdges(ArrayList<Edge> edges) {
         this.edges = edges;
     }
 
