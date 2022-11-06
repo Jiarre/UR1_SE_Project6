@@ -1,9 +1,10 @@
+import java.lang.reflect.Array;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class Graph {
 
-    private Vector<Edge> edges;
+    private ArrayList<Edge> edges;
     //private HashSet nodes;
     private int maxweight;
 
@@ -16,13 +17,35 @@ public class Graph {
 
     private boolean isDirected;
     public Graph(boolean isDirected){
-        this.edges = new Vector<>();
+        this.edges = new ArrayList<>();
         //this.nodes = new HashSet();
         this.maxweight = 0;
         this.isDirected = isDirected;
         //this.nodesMap = new ConcurrentHashMap<>();
         //this.nodesSet = nodesMap.keySet("SET-ENTRY");
         this.maxnodelenght = 0;
+
+
+    }
+    public Graph(boolean isDirected,int nedges){
+        this.edges = new ArrayList<>(nedges);
+        for (int i = 0; i < nedges; i++) {
+            edges.add(null);
+        }
+
+        //this.nodes = new HashSet();
+        this.maxweight = 0;
+        this.isDirected = isDirected;
+        //this.nodesMap = new ConcurrentHashMap<>();
+        //this.nodesSet = nodesMap.keySet("SET-ENTRY");
+        this.maxnodelenght = 0;
+
+
+    }
+    public Graph(boolean isDirected,int maxnodelenght,int maxweight){
+        this.maxweight = maxweight;
+        this.isDirected = isDirected;
+        this.maxnodelenght = maxnodelenght;
 
 
     }
@@ -36,9 +59,14 @@ public class Graph {
         if(roundup(e.getN2())>this.maxnodelenght){
             this.maxnodelenght = roundup(e.getN2());
         }
-        if(e.getWeight()>this.maxweight){
-            this.maxweight = e.getWeight();
+        if(roundup(e.getWeight())>this.maxweight){
+            this.maxweight = roundup(e.getWeight());
         }
+
+    }
+    public void addEdgePostion(Edge e,int position){
+        this.edges.set(position,e);
+
 
     }
     public int roundup(int k){
@@ -54,11 +82,11 @@ public class Graph {
         System.out.println(edges);
     }
 
-    public Vector<Edge> getEdges() {
+    public ArrayList<Edge> getEdges() {
         return edges;
     }
 
-    public void setEdges(Vector<Edge> edges) {
+    public void setEdges(ArrayList<Edge> edges) {
         this.edges = edges;
     }
 
@@ -94,11 +122,11 @@ public class Graph {
             return false;
         }
         if(this.maxweight != e.maxweight){
-            System.out.println("Original and Decoded graph don't have the same maxweight");
+            System.out.println("Original and Decoded graph don't have the same maxweight [Decoded:"+this.maxweight+" Original: "+e.maxweight+"]");
             return false;
         }
         if(this.maxnodelenght != e.maxnodelenght){
-            System.out.println("Original and Decoded graph don't have the size of nodes ["+nodesSet.size()+"!="+e.nodesSet.size()+"]");
+            System.out.println("Original and Decoded graph don't have the same number of nodes");
             return false;
         }
 
