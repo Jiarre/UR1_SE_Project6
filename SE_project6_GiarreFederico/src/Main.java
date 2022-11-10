@@ -3,16 +3,24 @@ import java.io.FileNotFoundException;
 import java.util.BitSet;
 import java.util.Scanner;
 
+/***
+ * @author Federico Giarrè
+ */
 public class Main {
 
     public static int nthread_encoding; //number of threads to use for the encoding
     public static int nthread_decoding; //number of threads to use for the decoding
     public static void main(String[] args) throws InterruptedException {
-        Graph g = new Graph(false); //Initialize a Graph
+        Graph g = new Graph(); //Initialize a Graph
         //Menu prompt
         graphParser(g); //parse the graph from file
         menu(g);
     }
+
+    /***
+     * Ask for an example to load and update g consequently
+     * @param g Graph to fill with edges
+     */
     public static void graphParser(Graph g){
         Scanner sc= new Scanner(System.in);
         System.out.print("Enter the name of the file to load situated in the Examples folder:");
@@ -42,6 +50,12 @@ public class Main {
             e.printStackTrace();
         }
     }
+
+    /***
+     * Menu for the operation. Ask for the number of thread to use and calls the selected execution mode
+     * @param g Graph to encode/decode
+     * @throws InterruptedException
+     */
     public static void menu(Graph g) throws InterruptedException {
         Scanner sc= new Scanner(System.in);
         System.out.print("Enter the number of threads you wish to use to run the encoding:");
@@ -69,6 +83,12 @@ public class Main {
 
         }
     }
+
+    /***
+     * Execute the encode/decoding printing also the entire bit representation and list of decoded edges
+     * @param g Graph to encode/decode
+     * @throws InterruptedException
+     */
     public static void start_verbose(Graph g) throws InterruptedException {
         BitSet bs;
 
@@ -93,6 +113,11 @@ public class Main {
         }
     }
 
+    /***
+     * Start an infinite loop of encoding/decoding
+     * @param g Graph to encode/decode
+     * @throws InterruptedException
+     */
     public static void start_infinite_loop(Graph g) throws InterruptedException {
         while(true){
             //Encoding
@@ -111,6 +136,12 @@ public class Main {
             }
         }
     }
+
+    /***
+     * Start an iteration of encoding/decoding, printing performance data such as avg speed of encoding, decoding and Omega(bit used for encoding)
+     * @param g Graph to encode/decode
+     * @throws InterruptedException
+     */
     public static void start_performance_test(Graph g) throws InterruptedException {
 
         float sume=0;

@@ -18,11 +18,17 @@ public class Encoder implements Runnable {
         return bs;
     }
 
+    /***
+     * Constructor, prepares the Encoder to encode
+     * @param g Graph to encode
+     * @param nthread Number of threads to use for the encoding
+     * @throws InterruptedException
+     */
     public Encoder(Graph g, int nthread) throws InterruptedException {
         this.g = g;
         bitedges = roundup(g.getEdges().size()); //get the power of two that cover the number of edges
-        bitnodes = g.getMaxnodelenght(); //get the power of two that cover the representation of the nodes
-        bitweights = g.getMaxweightlenght()+1; //get the power of two that cover the representation of the weights (and their sign)
+        bitnodes = g.getMaxnodelength(); //get the power of two that cover the representation of the nodes
+        bitweights = g.getMaxweightlength()+1; //get the power of two that cover the representation of the weights (and their sign)
         if(bitweights == 1){ //If there is no weight, just use 0
             bitweights--;
         }
@@ -36,6 +42,11 @@ public class Encoder implements Runnable {
 
     }
 
+    /***
+     * Setup the header of the encoding and start the threads for the proper encoding
+     * @return Resulting BitSet
+     * @throws InterruptedException
+     */
     public BitSet encode() throws InterruptedException {
         //Create header bitset
         BitSet syncedges = new BitSet(); //Number of edges
@@ -69,7 +80,9 @@ public class Encoder implements Runnable {
         return bs;
     }
 
-
+    /***
+     * Function to be executed by threads, split the edges encoding among threads
+     */
     public void dump(){
         /*
         Create division of values between threads, every thread will take a slice of edges
@@ -110,7 +123,7 @@ public class Encoder implements Runnable {
     }
 
     /***
-     *
+     * Insert an int inside the BitSet, caring about the padding and total amount of bit to use
      * @param number: int to be converted in binary
      * @param bs: BitSet in which to add the number
      * @param total: Total number of bit used to represent number in binary
@@ -209,16 +222,26 @@ public class Encoder implements Runnable {
         return res;
     }
 
+    /***
+     * Run function to start threads
+     */
     @Override
     public void run() {
         dump();
     }
 
- //Getters
+    /***
+     * Getter for bitnodes
+     * @return bitnodes value
+     */
     public int getBitnodes() {
         return bitnodes;
     }
 
+    /***
+     * Getter for bitweights
+     * @return bitweights value
+     */
     public int getBitweights() {
         return bitweights;
     }

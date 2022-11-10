@@ -1,52 +1,62 @@
 import java.util.*;
-import java.util.concurrent.ConcurrentHashMap;
 
 public class Graph {
 
     private ArrayList<Edge> edges;
     //private HashSet nodes;
-    private int maxweightlenght;
+    private int maxweightlength;
 
-    private int maxnodelenght;
+    private int maxnodelength;
 
     private boolean isDirected;
-    public Graph(boolean isDirected){
+
+    /***
+     * Base constructor
+     */
+    public Graph(){
         this.edges = new ArrayList<>();
-        this.maxweightlenght = 0;
-        this.isDirected = isDirected;
-        this.maxnodelenght = 0;
+        this.maxweightlength = 0;
+        this.isDirected = false;
+        this.maxnodelength = 0;
 
 
     }
-    public Graph(boolean isDirected,int nedges){
-        this.edges = new ArrayList<>(nedges);
-        for (int i = 0; i < nedges; i++) {
-            edges.add(null);
-        }
-        this.maxweightlenght = 0;
-        this.isDirected = isDirected;
-        this.maxnodelenght = 0;
 
-
-    }
-    public Graph(boolean isDirected,int maxnodelenght,int maxweightlenght){
-        this.maxweightlenght = maxweightlenght;
+    /***
+     * Constructor useful during the decoding process
+     * @param isDirected flag to set if the graph is directed or not
+     * @param maxnodelength flag to set the number of bit used by each node
+     * @param maxweightlength flag to set the number of bit used by the weight
+     */
+    public Graph(boolean isDirected, int maxnodelength, int maxweightlength){
+        this.maxweightlength = maxweightlength;
         this.isDirected = isDirected;
-        this.maxnodelenght = maxnodelenght;
+        this.maxnodelength = maxnodelength;
     }
+
+    /***
+     * Allow to add one Edge object to the Graph
+     * @param e Edge object to be added
+     */
     public void addEdge(Edge e){
         this.edges.add(e);
-        if(roundup(e.getN1())>this.maxnodelenght){
-            this.maxnodelenght = roundup(e.getN1());
+        if(roundup(e.getN1())>this.maxnodelength){
+            this.maxnodelength = roundup(e.getN1());
         }
-        if(roundup(e.getN2())>this.maxnodelenght){
-            this.maxnodelenght = roundup(e.getN2());
+        if(roundup(e.getN2())>this.maxnodelength){
+            this.maxnodelength = roundup(e.getN2());
         }
-        if(roundup(e.getWeight())>this.maxweightlenght){
-            this.maxweightlenght = roundup(e.getWeight());
+        if(roundup(e.getWeight())>this.maxweightlength){
+            this.maxweightlength = roundup(e.getWeight());
         }
 
     }
+
+    /***
+     * Utility function to find the next power of two that fits the int k
+     * @param k int to be fitted in binary representation
+     * @return the number of bit to be used for representing k
+     */
     public int roundup(int k){
         int power = 1;
         int count = 0;
@@ -56,26 +66,43 @@ public class Graph {
         }
         return count;
     }
+
+    /***
+     * Utility to print the edges of the Graph
+     */
     public void printGraph(){
         System.out.println(edges);
     }
 
+    /***
+     * Edges getter
+     * @return the list of edges composing the graph
+     */
     public ArrayList<Edge> getEdges() {
         return edges;
     }
 
+    /***
+     * Edges setter
+     * @param edges list of edges to be set
+     */
     public void setEdges(ArrayList<Edge> edges) {
         this.edges = edges;
     }
 
 
-
-
-
-    public int getMaxweightlenght() {
-        return maxweightlenght;
+    /***
+     * maxweightlength getter
+     * @return the value of maxweightlength
+     */
+    public int getMaxweightlength() {
+        return maxweightlength;
     }
 
+    /***
+     * Function to get if the Graph is directed, but as 0 or 1
+     * @return int representation of the boolean value of isDirected
+     */
     public int isDirected() {
         return isDirected ? 1 : 0;
     }
@@ -84,6 +111,11 @@ public class Graph {
         isDirected = directed;
     }
 
+    /***
+     * Ovveride of equal function
+     * @param o Graph to be compared
+     * @return boolean result of the comparison
+     */
     @Override
     public boolean equals(Object o){
         Graph e = (Graph) o;
@@ -91,11 +123,11 @@ public class Graph {
             System.out.println("Original and Decoded graph are not directed in the same way");
             return false;
         }
-        if(this.maxweightlenght != e.maxweightlenght){
-            System.out.println("Original and Decoded graph don't have the same maxweightlenght [Decoded:"+this.maxweightlenght +" Original: "+e.maxweightlenght +"]");
+        if(this.maxweightlength != e.maxweightlength){
+            System.out.println("Original and Decoded graph don't have the same maxweightlenght [Decoded:"+this.maxweightlength +" Original: "+e.maxweightlength +"]");
             return false;
         }
-        if(this.maxnodelenght != e.maxnodelenght){
+        if(this.maxnodelength != e.maxnodelength){
             System.out.println("Original and Decoded graph don't have the same number of nodes");
             return false;
         }
@@ -114,7 +146,12 @@ public class Graph {
         return flag;
     }
 
-    public int getMaxnodelenght() {
-        return maxnodelenght;
+    /***
+     * maxnodelength getter
+     * @return maxnodelength;
+     */
+    public int getMaxnodelength() {
+        return maxnodelength;
     }
+
 }
