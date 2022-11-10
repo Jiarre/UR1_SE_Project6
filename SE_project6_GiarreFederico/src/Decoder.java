@@ -9,18 +9,24 @@ public class Decoder implements Runnable {
     private int bitnode; //store the length (in bit) of the representation of a node
     private int bitweight; //store the length (in bit) if the representation of a weight (can be 0)
     private Thread t;
-    private int nthread;
+    private int nthread; //number of threads to be used
     private ArrayList<Thread> threads;
 
-    private ArrayList<Edge> results;
+    private ArrayList<Edge> results; //Temporary location for results
 
     private boolean isDirected;
 
     private Graph g;
-    public Decoder(BitSet bs, int n) throws InterruptedException {
+
+    /***
+     * Constructor for the decoder
+     * @param bs BitSet to decode
+     * @param nthread number of threads to use in decoding
+     */
+    public Decoder(BitSet bs, int nthread)  {
         threads = new ArrayList<Thread>();
         this.bs = bs;
-        this.nthread = n;
+        this.nthread = nthread;
         isDirected = false;
         if(bs.get(0)){
             isDirected = true;
@@ -30,7 +36,6 @@ public class Decoder implements Runnable {
         bitnode = convert(bs.get(33,49),16);
         bitweight = convert(bs.get(49,65),16);
         line = 2*bitnode + bitweight;
-        //System.out.println("edges:"+nedges+" line:"+line+" bitnode:"+bitnode+" bitweight:"+bitweight);
         if(bitweight == 0)
             g = new Graph(isDirected,bitnode,bitweight);
         else
@@ -39,6 +44,17 @@ public class Decoder implements Runnable {
         for(int i=0; i<nedges;i++){
             results.add(null);
         }
+
+
+
+    }
+
+    /***
+     * Start the threads for the decoding
+     * @return Decoded Graph object
+     * @throws InterruptedException
+     */
+    public Graph decode() throws InterruptedException {
         for(int i = 0; i<nthread;i++){
 
             t = new Thread (this, ""+i);
@@ -50,14 +66,14 @@ public class Decoder implements Runnable {
             t.join();
         }
         g.setEdges(results);
-
-
-    }
-
-    public Graph getGraph() {
         return g;
-    }
+    };
 
+
+    /***
+     * Split the BitSet among threads to decode
+     * @throws InterruptedException
+     */
     public void decodeBitSet() throws InterruptedException {
         int tn = Integer.parseInt(Thread.currentThread().getName());
         int d = (int) Math.floor(nedges/nthread);
@@ -75,6 +91,12 @@ public class Decoder implements Runnable {
         }
 
     }
+
+    /***
+     * Decode a BitSet edge in a Edge object
+     * @param edge BitSet portion of the graph BitSet
+     * @param position position that the edge has to have inside the edge list
+     */
     public void decodeEdge(BitSet edge,int position){
         int node1 = convert(edge.get(0,bitnode),bitnode);
         int node2 = convert(edge.get(bitnode,2*bitnode),bitnode);
@@ -91,11 +113,18 @@ public class Decoder implements Runnable {
 
         results.set(position,new Edge(node1,node2,weight));
     }
-    public  int convert(BitSet bits,int pad) {
+
+    /***
+     * Convert the weight to int, caring about the sign bit
+     * @param weight Weight to be decoded
+     * @param pad used for correct positioning
+     * @return int representation of the binary weight
+     */
+    public  int convert(BitSet weight,int pad) {
         int intValue = 0;
 
         for (int i = pad-1; i >=0; i--) {
-            if (bits.get(i)) {
+            if (weight.get(i)) {
                 intValue += Math.pow(2,pad-1-i);
             }
         }
@@ -105,7 +134,9 @@ public class Decoder implements Runnable {
 
     }
 
-
+    /***
+     * Run method to start threads
+     */
     @Override
     public void run() {
         try {

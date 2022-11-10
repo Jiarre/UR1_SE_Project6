@@ -3,24 +3,28 @@ import java.io.FileNotFoundException;
 import java.util.BitSet;
 import java.util.Scanner;
 
+/***
+ * @author Federico Giarrè
+ */
 public class Main {
 
-    public static String examplename;
-    public static int nthread_encoding;
-    public static int nthread_decoding;
+    public static int nthread_encoding; //number of threads to use for the encoding
+    public static int nthread_decoding; //number of threads to use for the decoding
     public static void main(String[] args) throws InterruptedException {
-        Graph g = new Graph(false);
+        Graph g = new Graph(); //Initialize a Graph
+        //Menu prompt
+        graphParser(g); //parse the graph from file
+        menu(g);
+    }
+
+    /***
+     * Ask for an example to load and update g consequently
+     * @param g Graph to fill with edges
+     */
+    public static void graphParser(Graph g){
         Scanner sc= new Scanner(System.in);
         System.out.print("Enter the name of the file to load situated in the Examples folder:");
-        examplename= sc.nextLine();
-        System.out.print("Enter the number of threads you wish to use to run the encoding:");
-        nthread_encoding= sc.nextInt();
-        System.out.print("Enter the number of threads you wish to use to run the decoding:");
-        nthread_decoding= sc.nextInt();
-        System.out.print("Select which mode of the program should be run from:\n1)Verbose (Print to screen every step of the process)\n2)Performance Test (Print to screen time spent and size of the encoding)\n3)Infinite (Run the program in a while loop) ");
-        int choice= sc.nextInt();
-        System.out.flush();
-
+        String examplename= sc.nextLine();
         try {
             File myObj = new File("Examples/"+examplename);
 
@@ -45,35 +49,58 @@ public class Main {
             System.out.println("An error occurred.");
             e.printStackTrace();
         }
-        switch(choice){
+    }
+
+    /***
+     * Menu for the operation. Ask for the number of thread to use and calls the selected execution mode
+     * @param g Graph to encode/decode
+     * @throws InterruptedException
+     */
+    public static void menu(Graph g) throws InterruptedException {
+        Scanner sc= new Scanner(System.in);
+        System.out.print("Enter the number of threads you wish to use to run the encoding:");
+        nthread_encoding = sc.nextInt();
+        System.out.print("Enter the number of threads you wish to use to run the decoding:");
+        nthread_decoding = sc.nextInt();
+        System.out.print("Select which mode of the program should be run from:\n1)Verbose (Print to screen every step of the process)\n2)Performance Test (Print to screen time spent and size of the encoding)\n3)Infinite (Run the program in a while loop) ");
+        int choice = sc.nextInt();
+        System.out.flush();
+
+        //Menu dispatcher
+        switch (choice) {
             case 1:
-                start_verbose(g);
+                start_verbose(g); //Calls for an execution in which every step is printed
                 break;
             case 2:
-                start_performance_test(g);
+                start_performance_test(g); //Calls for an execution in which the performance are tested
                 break;
             case 3:
-                start_infinite_loop(g);
+                start_infinite_loop(g); //Calls for an infinite loop of executions
                 break;
             default:
                 start_performance_test(g);
                 break;
 
         }
-
-
-
     }
+
+    /***
+     * Execute the encode/decoding printing also the entire bit representation and list of decoded edges
+     * @param g Graph to encode/decode
+     * @throws InterruptedException
+     */
     public static void start_verbose(Graph g) throws InterruptedException {
         BitSet bs;
 
-        Encoder e = new Encoder(g,nthread_encoding);
-        bs = e.getBs();
+        Encoder e = new Encoder(g,nthread_encoding); //Generate the encoder
+        bs = e.encode(); //Get the encoded BitSet
+        //Print the encoded BitSet
         System.out.println("Finished dumping, obtained bits:");
         System.out.println(e.printBitSet(bs));
 
-        Decoder d = new Decoder(bs,nthread_decoding);
-        Graph result = d.getGraph();
+        Decoder d = new Decoder(bs,nthread_decoding); //Generate the decoder
+        Graph result = d.decode();
+        //Print original and decoded graph
         System.out.println("Original Graph");
         g.printGraph();
         System.out.println("Encoded/Decoded Graph");
@@ -86,14 +113,20 @@ public class Main {
         }
     }
 
+    /***
+     * Start an infinite loop of encoding/decoding
+     * @param g Graph to encode/decode
+     * @throws InterruptedException
+     */
     public static void start_infinite_loop(Graph g) throws InterruptedException {
         while(true){
+            //Encoding
             BitSet bs;
             Encoder e = new Encoder(g,nthread_encoding);
-            bs = e.getBs();
-
+            bs = e.encode();
+            //Decoding
             Decoder d = new Decoder(bs,nthread_decoding);
-            Graph result = d.getGraph();
+            Graph result = d.decode();
 
             if(result.equals(g)){
                 System.out.println("\nOriginal and Encoded/Decoded Graph are the same :D");
@@ -103,24 +136,32 @@ public class Main {
             }
         }
     }
+
+    /***
+     * Start an iteration of encoding/decoding, printing performance data such as avg speed of encoding, decoding and Omega(bit used for encoding)
+     * @param g Graph to encode/decode
+     * @throws InterruptedException
+     */
     public static void start_performance_test(Graph g) throws InterruptedException {
+
         float sume=0;
         float sumd=0;
         float avg_encoding=0;
         float avg_decoding=0;
         Graph result = null;
         Encoder e = null;
+        //Execute 100 the program, in order to get an avg (Singular execution seems to have better result on 1 thread)
         for(int i = 1; i<100; i++) {
             BitSet bs;
-            long startencoding = System.nanoTime();
             e = new Encoder(g, nthread_encoding);
+            long startencoding = System.nanoTime();
+            bs = e.encode();
             long stopencoding = System.nanoTime();
 
-            bs = e.getBs();
-            long startdecoding = System.nanoTime();
             Decoder d = new Decoder(bs, nthread_decoding);
+            long startdecoding = System.nanoTime();
+            result = d.decode();
             long stopdecoding = System.nanoTime();
-            result = d.getGraph();
             sume += ((float)(stopencoding-startencoding)/1000000);
             sumd += ((float)(stopdecoding-startdecoding)/1000000);
         }
