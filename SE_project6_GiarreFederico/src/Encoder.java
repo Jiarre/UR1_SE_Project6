@@ -10,12 +10,9 @@ public class Encoder implements Runnable {
     private int bitline;
     private int nthread;
 
-    private int count;
-
     private BitSet bs;
 
     private ArrayList<Thread> threads;
-
 
     public BitSet getBs() {
         return bs;
@@ -23,70 +20,85 @@ public class Encoder implements Runnable {
 
     public Encoder(Graph g, int nthread) throws InterruptedException {
         this.g = g;
-        bitedges = roundup(g.getEdges().size());
-        //bitnodes = roundup(g.getNodes().size());
-        bitnodes = g.getMaxnodelenght();
-        bitweights = g.getMaxweight()+1;
-        if(bitweights == 1){
+        bitedges = roundup(g.getEdges().size()); //get the power of two that cover the number of edges
+        bitnodes = g.getMaxnodelenght(); //get the power of two that cover the representation of the nodes
+        bitweights = g.getMaxweightlenght()+1; //get the power of two that cover the representation of the weights (and their sign)
+        if(bitweights == 1){ //If there is no weight, just use 0
             bitweights--;
         }
         bitline = (2*bitnodes + bitweights);
         this.nthread = nthread;
         bs = new BitSet();
-        count = 0;
         threads = new ArrayList<Thread>();
 
-        BitSet syncedges = new BitSet();
-        BitSet syncnodes = new BitSet();
-        BitSet syncweight = new BitSet();
-        BitSet synclines = new BitSet();
-        BitSet syncdir = new BitSet();
+
+
+
+    }
+
+    public BitSet encode() throws InterruptedException {
+        //Create header bitset
+        BitSet syncedges = new BitSet(); //Number of edges
+        BitSet syncnodes = new BitSet();//Bits used for each node
+        BitSet syncweight = new BitSet();//Bits used for each weight
+        BitSet syncdir = new BitSet();//Directed / NonDirected graph?
 
 
 
 
-        syncinsert(g.getEdges().size(),syncedges,32);
-        syncinsert(bitnodes,syncnodes,16);
-        syncinsert(bitweights,syncweight,16);
-        syncinsert(g.isDirected(),syncdir,1);
+        syncinsert(g.getEdges().size(),syncedges,32); //Maximum of 2^32 edges
+        syncinsert(bitnodes,syncnodes,16);//Maximum of 2^16 nodes in the graph
+        syncinsert(bitweights,syncweight,16);//Maximum of 2^15 as weight (1 bit for sign)
+        syncinsert(g.isDirected(),syncdir,1);//1 bit flag for the directed/nondirected
+
+        //Compose the order flag->#edges->#bitpernode->#bitperweight with the correct padding
         concatenateBitSet(syncnodes,syncweight,16);
         concatenateBitSet(syncedges,syncnodes,32);
         concatenateBitSet(syncdir,syncedges,1);
         concatenateBitSet(bs,syncdir,0);
-
-        //System.out.println("edges:"+g.getEdges().size()+" line:"+bitline+" bitnode:"+bitnodes+" bitweight:"+bitweights);
+        //Start threads
         for(int i = 0; i<nthread;i++){
-
             Thread t = new Thread (this, ""+i);
             t.start();
             threads.add(t);
         }
-
+        //Wait for all threads to finish
         for(Thread t : threads){
             t.join();
         }
-
-        //chiedi se è meglio fare stringona o sommare bitsets ogni volta
-
+        return bs;
     }
 
 
     public void dump(){
+        /*
+        Create division of values between threads, every thread will take a slice of edges
+        Threads should not overlap.
+        */
+
         int tn = Integer.parseInt(Thread.currentThread().getName());
         int lines = g.getEdges().size();
         int d = (int) Math.floor(lines/nthread);
 
         if(tn != nthread-1){
-            //System.out.println("THread "+ tn + "if normale");
             for(int i = tn*d; i<(tn+1)*d; i++){
-                BitSet line = concatenateLine(g.getEdges().get(i));
-                 concatenateBitSet(bs,line,65 + (i*bitline));            }
+                //Append next line at position header (65) + i*line, so no line is overlapped in the Bitset
+                concatenateBitSet(bs, convertLine(g.getEdges().get(i)),65 + (i*bitline));
+            }
         }else{
-            //System.out.println("THread "+ tn + "if speciale");
             for(int i = tn*d; i<lines; i++){
-                concatenateBitSet(bs,concatenateLine(g.getEdges().get(i)),65 + (i*bitline));            }
+                //Same of latter
+                concatenateBitSet(bs, convertLine(g.getEdges().get(i)),65 + (i*bitline));
+                }
         }
     }
+
+
+    /***
+     *  Utility function to find the next power of two able to describe the int given
+      * @param k: int to be represented
+     * @return the number of bits needed to represent k
+     */
     public int roundup(int k){
         int power = 1;
         int count = 0;
@@ -96,30 +108,44 @@ public class Encoder implements Runnable {
         }
         return count;
     }
+
+    /***
+     *
+     * @param number: int to be converted in binary
+     * @param bs: BitSet in which to add the number
+     * @param total: Total number of bit used to represent number in binary
+     */
     public void syncinsert(int number, BitSet bs,int total){
-
-
         String bits = String.format("%"+total+"s", Integer.toBinaryString(number)).replace(" ", "0");
-
         for (int i = 0; i < total; i++) {
             if (bits.charAt(i) == '1') {
-
                 bs.set(i);
             } else {
                 bs.clear(i);
             }
         }
-        //bs.set(bits.length(),15,false);
+
     }
 
-
+    /***
+     * Function to append one bitset to another
+     * @param a: first bitset, bitset b will be added to a
+     * @param b: second bitset, to be appended to a
+     * @param pad: pad to be respected in order to maintain the static padding
+     */
     public synchronized void concatenateBitSet(BitSet a, BitSet b,int pad){
         for(int i = 0; i<b.length(); i++){
 
             a.set(pad + i,b.get(i));
         }
     }
-    public BitSet concatenateLine(Edge e){
+
+    /**
+     * Convert an edge in binary form
+     * @param e: Edge to be converted
+     * @return BitSet created from the edge
+     */
+    public BitSet convertLine(Edge e){
         int n1 = e.getN1();
         int n2 = e.getN2();
         int weight = e.getWeight();
@@ -162,12 +188,15 @@ public class Encoder implements Runnable {
                 line.clear((2*bitnodes));
             }
         }
-
-        //System.out.println(printBitSet(line));
         return line;
 
     }
 
+    /***
+     * Utility function to print a BitSet in human-readable format (newlines for each edge and clear header)
+     * @param bs: BitSet to be printed
+     * @return BitSet to be printed
+     */
     public  String printBitSet(BitSet bs){
         String res = "";
         for(int i=0;i<bs.size();i++){
@@ -185,10 +214,7 @@ public class Encoder implements Runnable {
         dump();
     }
 
-    public int getBitedges() {
-        return bitedges;
-    }
-
+ //Getters
     public int getBitnodes() {
         return bitnodes;
     }
@@ -197,7 +223,4 @@ public class Encoder implements Runnable {
         return bitweights;
     }
 
-    public int getBitline() {
-        return bitline;
-    }
 }

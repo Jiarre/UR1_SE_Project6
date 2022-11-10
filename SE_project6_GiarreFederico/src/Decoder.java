@@ -9,10 +9,10 @@ public class Decoder implements Runnable {
     private int bitnode; //store the length (in bit) of the representation of a node
     private int bitweight; //store the length (in bit) if the representation of a weight (can be 0)
     private Thread t;
-    private int nthread;
+    private int nthread; //number of threads to be used
     private ArrayList<Thread> threads;
 
-    private ArrayList<Edge> results;
+    private ArrayList<Edge> results; //Temporary location for results
 
     private boolean isDirected;
 
@@ -39,6 +39,11 @@ public class Decoder implements Runnable {
         for(int i=0; i<nedges;i++){
             results.add(null);
         }
+
+
+
+    }
+    public Graph decode() throws InterruptedException {
         for(int i = 0; i<nthread;i++){
 
             t = new Thread (this, ""+i);
@@ -50,9 +55,8 @@ public class Decoder implements Runnable {
             t.join();
         }
         g.setEdges(results);
-
-
-    }
+        return g;
+    };
 
     public Graph getGraph() {
         return g;
