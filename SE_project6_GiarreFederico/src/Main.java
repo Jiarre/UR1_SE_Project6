@@ -1,5 +1,4 @@
-import java.io.File;
-import java.io.FileNotFoundException;
+import java.io.*;
 import java.util.BitSet;
 import java.util.Scanner;
 
@@ -10,7 +9,9 @@ public class Main {
 
     public static int nthread_encoding; //number of threads to use for the encoding
     public static int nthread_decoding; //number of threads to use for the decoding
-    public static void main(String[] args) throws InterruptedException {
+
+    public static String examplename; //name of the example used
+    public static void main(String[] args) throws InterruptedException, IOException {
         Graph g = new Graph(); //Initialize a Graph
         //Menu prompt
         graphParser(g); //parse the graph from file
@@ -24,7 +25,7 @@ public class Main {
     public static void graphParser(Graph g){
         Scanner sc= new Scanner(System.in);
         System.out.print("Enter the name of the file to load situated in the Examples folder:");
-        String examplename= sc.nextLine();
+        examplename= sc.nextLine();
         try {
             File myObj = new File("Examples/"+examplename);
 
@@ -56,7 +57,7 @@ public class Main {
      * @param g Graph to encode/decode
      * @throws InterruptedException
      */
-    public static void menu(Graph g) throws InterruptedException {
+    public static void menu(Graph g) throws InterruptedException, IOException {
         Scanner sc= new Scanner(System.in);
         System.out.print("Enter the number of threads you wish to use to run the encoding:");
         nthread_encoding = sc.nextInt();
@@ -142,7 +143,7 @@ public class Main {
      * @param g Graph to encode/decode
      * @throws InterruptedException
      */
-    public static void start_performance_test(Graph g) throws InterruptedException {
+    public static void start_performance_test(Graph g) throws InterruptedException, IOException {
 
         float sume=0;
         float sumd=0;
@@ -150,23 +151,39 @@ public class Main {
         float avg_decoding=0;
         Graph result = null;
         Encoder e = null;
+        File test=new File("Tests/"+examplename+".csv");
+        FileWriter writer = null;
+        if (!test.exists()){
+            writer = new FileWriter(test);
+            String str = "number,type,time\n";
+            writer.write(str);
+        }else{
+            writer = new FileWriter(test,true);
+        }
+
+
         //Execute 100 the program, in order to get an avg (Singular execution seems to have better result on 1 thread)
-        for(int i = 1; i<100; i++) {
+        for(int i = 1; i<1000; i++) {
             BitSet bs;
             e = new Encoder(g, nthread_encoding);
             long startencoding = System.nanoTime();
             bs = e.encode();
             long stopencoding = System.nanoTime();
+            writer.write(nthread_encoding+",encoder,"+((float)(stopencoding-startencoding)/1000000)+"\n");
 
             Decoder d = new Decoder(bs, nthread_decoding);
             long startdecoding = System.nanoTime();
             result = d.decode();
             long stopdecoding = System.nanoTime();
+            writer.write(nthread_decoding+",decoder,"+((float)(stopdecoding-startdecoding)/1000000)+"\n");
+
+            //writer.write(nthread_encoding+","+nthread_decoding+","+((float)(stopencoding-startencoding)/1000000)+","+((float)(stopdecoding-startdecoding)/1000000)+"\n");
             sume += ((float)(stopencoding-startencoding)/1000000);
             sumd += ((float)(stopdecoding-startdecoding)/1000000);
         }
-        avg_encoding = sume/100;
-        avg_decoding = sumd/100;
+        writer.close();
+        avg_encoding = sume/1000;
+        avg_decoding = sumd/1000;
         if(result.equals(g)){
             System.out.println("\n\nOriginal and Encoded/Decoded Graph are the same :D");
             System.out.println("Performances to encode/decode a Graph with "+g.getEdges().size() +" edges using "+nthread_encoding+" threads to encode and "+nthread_decoding+" threads to decode:");
