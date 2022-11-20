@@ -4,8 +4,8 @@ import pandas as pd
 import os
 import matplotlib.pyplot as plt 
 sns.set_theme(style="whitegrid")
-for filename in os.listdir("../Tests"):
-    f = os.path.join("../Tests", filename)
+for filename in os.listdir("../"):
+    f = os.path.join("../", filename)
     # checking if it is a file
     if os.path.isfile(f):
         

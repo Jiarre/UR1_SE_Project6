@@ -7,8 +7,8 @@ import time
 
 sns.set_theme(style="whitegrid")
 count = 0
-for filename in os.listdir("../Tests"):
-    f = os.path.join("../Tests", filename)
+for filename in os.listdir("../"):
+    f = os.path.join("../", filename)
     # checking if it is a file
     
     if os.path.isfile(f):
@@ -19,8 +19,8 @@ for filename in os.listdir("../Tests"):
         df_enc = df[df.type == "encoder"]
         sns.ecdfplot(data=df_enc, x="time", hue="number",palette=sns.color_palette("viridis", as_cmap=True))
         plt.legend(loc='best')
-        plt.ylabel("Time to perform (ms)")
-        plt.xlabel("Number of threads used")
+        plt.ylabel("Probability")
+        plt.xlabel("Time used for encoding")
         plt.xlim(0,20)
         plt.grid(True,color="#D3D3D3")
         plt.legend(loc="best",labels=['4 threads', '3 threads', '2 threads',"1 thread"])
@@ -35,8 +35,8 @@ for filename in os.listdir("../Tests"):
         df_dec = df2[df2.type == "decoder"]
         sns.ecdfplot(data=df_dec, x="time", hue="number",palette=sns.color_palette("viridis", as_cmap=True))
         plt.legend(loc='best')
-        plt.ylabel("Time to perform (ms)")
-        plt.xlabel("Number of threads used")
+        plt.ylabel("Probability")
+        plt.xlabel("Time used for decoding")
         plt.xlim(0,20)
         plt.grid(True,color="#D3D3D3")
         plt.legend(loc="best",labels=['4 threads', '3 threads', '2 threads',"1 thread"])
