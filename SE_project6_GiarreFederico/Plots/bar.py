@@ -17,5 +17,5 @@ for filename in os.listdir("../Tests"):
         plt.xlabel("Number of threads used")
         plt.grid(True,color="#D3D3D3")
         plt.legend([],[], frameon=False)
-        plt.savefig(f"{filename}.png",bbox_inches='tight')
+        plt.savefig(f"{filename[:-4]}_bar.png",bbox_inches='tight')
         #plt.show()
