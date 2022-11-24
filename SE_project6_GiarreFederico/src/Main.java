@@ -63,7 +63,7 @@ public class Main {
         nthread_encoding = sc.nextInt();
         System.out.print("Enter the number of threads you wish to use to run the decoding:");
         nthread_decoding = sc.nextInt();
-        System.out.print("Select which mode of the program should be run from:\n1)Verbose (Print to screen every step of the process)\n2)Performance Test (Print to screen time spent and size of the encoding)\n3)Infinite (Run the program in a while loop) ");
+        System.out.print("Select which mode of the program should be run from:\n1)Verbose (Print to screen every step of the process)\n2)Performance Test (Print to screen time spent and size of the encoding)\n3)Infinite (Run the program in a while loop)\n");
         int choice = sc.nextInt();
         System.out.flush();
 
@@ -149,6 +149,7 @@ public class Main {
         float sumd=0;
         float avg_encoding=0;
         float avg_decoding=0;
+        float bsSize=0;
         Graph result = null;
         Encoder e = null;
         File test=new File("Tests/"+examplename+".csv");
@@ -162,13 +163,14 @@ public class Main {
         }
 
 
-        //Execute 100 the program, in order to get an avg (Singular execution seems to have better result on 1 thread)
-        for(int i = 1; i<1000; i++) {
+        //Execute 10000 the program, in order to get an avg (Singular execution seems to have better result on 1 thread)
+        for(int i = 0; i<1000; i++) {
             BitSet bs;
             e = new Encoder(g, nthread_encoding);
             long startencoding = System.nanoTime();
             bs = e.encode();
             long stopencoding = System.nanoTime();
+            bsSize = bs.size();
             writer.write(nthread_encoding+",encoder,"+((float)(stopencoding-startencoding)/1000000)+"\n");
 
             Decoder d = new Decoder(bs, nthread_decoding);
@@ -189,7 +191,9 @@ public class Main {
             System.out.println("Performances to encode/decode a Graph with "+g.getEdges().size() +" edges using "+nthread_encoding+" threads to encode and "+nthread_decoding+" threads to decode:");
             System.out.println("Time to encode the graph:" + (avg_encoding) + "ms");
             System.out.println("Time to decode the graph:" + (avg_decoding) + "ms");
-            System.out.println("Original Graph successfully encoded in " + (1+32+16+16+(g.getEdges().size()*(2*e.getBitnodes()+e.getBitweights()))) + " bits");
+            float size= (1+32+16+16+(g.getEdges().size()*(2*e.getBitnodes()+e.getBitweights())));
+            int spacelost =(int)Math.floor( 100 - ((100*size)/bsSize));
+            System.out.println("Original Graph successfully encoded in "+(int)size+" bits over "+(int)bsSize+" bits occupied by the BitSet (~"+(spacelost)+"% space lost)");
         }else{
             System.out.println("\nOriginal and Encoded/Decoded Graph are not the same :c");
 
